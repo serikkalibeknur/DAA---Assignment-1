@@ -14,19 +14,19 @@ public class QuickSort {
     private static void sort(int[] arr, int lo, int hi) {
         if (lo < hi) {
             int p = partition(arr, lo, hi);
-            if (p - lo < hi - p) { // Smaller partition first
+            if (p - lo < hi - p) { // Recurse smaller partition first
                 sort(arr, lo, p - 1);
                 sort(arr, p + 1, hi);
             } else {
                 sort(arr, p + 1, hi);
                 sort(arr, lo, p - 1);
             }
-            metrics.incrementDepth();
+            metrics.increaseDepth();
         }
     }
 
     private static int partition(int[] arr, int lo, int hi) {
-        int pivotIdx = lo + rand.nextInt(hi - lo + 1);
+        int pivotIdx = lo + rand.nextInt(hi - lo + 1); // Randomized pivot
         swap(arr, pivotIdx, hi);
         int pivot = arr[hi];
         int i = lo - 1;
@@ -38,7 +38,6 @@ public class QuickSort {
             }
         }
         swap(arr, i + 1, hi);
-        metrics.decrementDepth();
         return i + 1;
     }
 
@@ -49,6 +48,7 @@ public class QuickSort {
         metrics.incrementSwaps(1);
     }
 
+    // For testing
     public static int getMaxDepth() { return metrics.getMaxDepth(); }
     public static int getComparisonCount() { return metrics.getComparisonCount(); }
     public static int getSwapCount() { return metrics.getSwapCount(); }
