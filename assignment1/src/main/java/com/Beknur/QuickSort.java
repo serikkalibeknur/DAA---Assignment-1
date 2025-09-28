@@ -1,51 +1,55 @@
-package com.yourname;
+package com.Beknur;
 
 import java.util.Random;
 
 public class QuickSort {
+    private static Metrics metrics = new Metrics();
     private static Random rand = new Random();
 
-    public static void sort(int[] a, Metrics metrics) {
-        shuffle(a); // Randomize to avoid worst-case
-        sort(a, 0, a.length - 1, metrics);
+    public static void sort(int[] arr) {
+        metrics.reset();
+        sort(arr, 0, arr.length - 1);
     }
 
-    private static void sort(int[] a, int lo, int hi, Metrics metrics) {
-        while (lo < hi) {
-            metrics.incrementDepth();
-            int p = partition(a, lo, hi, metrics);
-            if (p - lo < hi - p) { // Recurse smaller
-                sort(a, lo, p - 1, metrics);
-                lo = p + 1; // Iterate larger
+    private static void sort(int[] arr, int lo, int hi) {
+        if (lo < hi) {
+            int p = partition(arr, lo, hi);
+            if (p - lo < hi - p) { // Smaller partition first
+                sort(arr, lo, p - 1);
+                sort(arr, p + 1, hi);
             } else {
-                sort(a, p + 1, hi, metrics);
-                hi = p - 1;
+                sort(arr, p + 1, hi);
+                sort(arr, lo, p - 1);
             }
-            metrics.decrementDepth();
+            metrics.incrementDepth();
         }
     }
 
-    private static int partition(int[] a, int lo, int hi, Metrics metrics) {
-        int pivot = a[lo + rand.nextInt(hi - lo + 1)]; // Randomized pivot
-        int i = lo, j = hi + 1;
-        while (true) {
-            while (a[++i] < pivot) { metrics.incrementComparisons(); if (i == hi) break; }
-            while (pivot < a[--j]) { metrics.incrementComparisons(); if (j == lo) break; }
-            if (i >= j) break;
-            swap(a, i, j);
+    private static int partition(int[] arr, int lo, int hi) {
+        int pivotIdx = lo + rand.nextInt(hi - lo + 1);
+        swap(arr, pivotIdx, hi);
+        int pivot = arr[hi];
+        int i = lo - 1;
+        for (int j = lo; j < hi; j++) {
+            metrics.incrementComparisons(1);
+            if (arr[j] <= pivot) {
+                i++;
+                swap(arr, i, j);
+            }
         }
-        swap(a, lo, j);
-        return j;
+        swap(arr, i + 1, hi);
+        metrics.decrementDepth();
+        return i + 1;
     }
 
-    private static void swap(int[] a, int i, int j) {
-        int temp = a[i]; a[i] = a[j]; a[j] = temp;
+    private static void swap(int[] arr, int i, int j) {
+        int temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+        metrics.incrementSwaps(1);
     }
 
-    private static void shuffle(int[] a) {
-        for (int i = a.length - 1; i > 0; i--) {
-            int j = rand.nextInt(i + 1);
-            swap(a, i, j);
-        }
-    }
+    public static int getMaxDepth() { return metrics.getMaxDepth(); }
+    public static int getComparisonCount() { return metrics.getComparisonCount(); }
+    public static int getSwapCount() { return metrics.getSwapCount(); }
 }

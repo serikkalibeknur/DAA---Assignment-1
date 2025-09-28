@@ -2,40 +2,58 @@ package com.Beknur;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Metrics {
-    private long startTime;
-    private AtomicInteger depth = new AtomicInteger(0);
-    private AtomicInteger comparisons = new AtomicInteger(0);
-    private AtomicInteger allocations = new AtomicInteger(0);
+    private int comparisonCount;
+    private int swapCount;
+    private int allocationCount;
+    private int recursionDepth;
+    private int maxDepth;
 
-    public void start() {
-        startTime = System.nanoTime();
-        depth.set(0);
-        comparisons.set(0);
-        allocations.set(0);
+    public Metrics() {
+        reset();
     }
 
-    public void incrementDepth() { depth.incrementAndGet(); }
-    public void decrementDepth() { depth.decrementAndGet(); }
-    public void incrementComparisons() { comparisons.incrementAndGet(); }
-    public void incrementAllocations() { allocations.incrementAndGet(); }
+    public void reset() {
+        comparisonCount = 0;
+        swapCount = 0;
+        allocationCount = 0;
+        recursionDepth = 0;
+        maxDepth = 0;
+    }
 
-    public long getTimeNs() { return System.nanoTime() - startTime; }
-    public int getDepth() { return depth.get(); }
-    public int getComparisons() { return comparisons.get(); }
-    public int getAllocations() { return allocations.get(); }
+    public void incrementComparisons(int count) {
+        comparisonCount += count;
+    }
 
-    public void writeToCSV(String fileName, int n, String algo) {
-        try (FileWriter writer = new FileWriter(fileName, true)) {
-            writer.append(algo).append(",").append(String.valueOf(n)).append(",")
-                    .append(String.valueOf(getTimeNs())).append(",")
-                    .append(String.valueOf(getDepth())).append(",")
-                    .append(String.valueOf(getComparisons())).append(",")
-                    .append(String.valueOf(getAllocations())).append("\n");
+    public void incrementSwaps(int count) {
+        swapCount += count;
+    }
+
+    public void incrementAllocations(int count) {
+        allocationCount += count;
+    }
+
+    public void increaseDepth() {
+        recursionDepth++;
+        maxDepth = Math.max(maxDepth, recursionDepth);
+    }
+
+    public void decreaseDepth() {
+        recursionDepth--;
+    }
+
+    public void writeToCSV(String filename, int size, long timeMs) {
+        try (FileWriter writer = new FileWriter(filename, true)) {
+            writer.append(String.format("%d,%d,%d,%d,%d%n", size, timeMs, comparisonCount, swapCount, maxDepth));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    // Getters for testing and reporting
+    public int getComparisonCount() { return comparisonCount; }
+    public int getSwapCount() { return swapCount; }
+    public int getAllocationCount() { return allocationCount; }
+    public int getMaxDepth() { return maxDepth; }
 }
