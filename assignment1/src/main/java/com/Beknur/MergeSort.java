@@ -1,4 +1,4 @@
-package com.Beknur;
+package com.yourname;
 
 import java.util.Arrays;
 
@@ -7,8 +7,7 @@ public class MergeSort {
     private static int[] aux; // Reusable buffer
 
     public static void sort(int[] arr) {
-        aux = new int[arr.length]; // Single allocation
-        metrics.incrementAllocations(1);
+        aux = new int[arr.length];
         metrics.reset();
         sort(arr, 0, arr.length - 1);
     }
@@ -18,14 +17,14 @@ public class MergeSort {
             insertionSort(arr, lo, hi);
             return;
         }
-        metrics.incrementDepth();
+        metrics.increaseDepth();
         if (lo < hi) {
             int mid = lo + (hi - lo) / 2;
             sort(arr, lo, mid);
             sort(arr, mid + 1, hi);
             merge(arr, lo, mid, hi);
         }
-        metrics.decrementDepth();
+        metrics.decreaseDepth();
     }
 
     private static void insertionSort(int[] arr, int lo, int hi) {
@@ -45,23 +44,16 @@ public class MergeSort {
         System.arraycopy(arr, lo, aux, lo, hi - lo + 1);
         int i = lo, j = mid + 1;
         for (int k = lo; k <= hi; k++) {
-            if (i > mid) {
-                metrics.incrementComparisons(1);
-                arr[k] = aux[j++];
-            } else if (j > hi) {
-                metrics.incrementComparisons(1);
-                arr[k] = aux[i++];
-            } else if (aux[j] < aux[i]) {
-                metrics.incrementComparisons(1);
-                arr[k] = aux[j++];
-            } else {
-                metrics.incrementComparisons(1);
-                arr[k] = aux[i++];
-            }
+            if (i > mid) arr[k] = aux[j++];
+            else if (j > hi) arr[k] = aux[i++];
+            else if (aux[j] < aux[i]) arr[k] = aux[j++];
+            else arr[k] = aux[i++];
+            metrics.incrementComparisons(1);
             metrics.incrementSwaps(1);
         }
     }
 
+    // For testing
     public static int getMaxDepth() { return metrics.getMaxDepth(); }
     public static int getComparisonCount() { return metrics.getComparisonCount(); }
     public static int getSwapCount() { return metrics.getSwapCount(); }
